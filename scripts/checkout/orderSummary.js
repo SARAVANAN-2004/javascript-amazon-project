@@ -4,8 +4,8 @@ updateDeliveryOption} from "../../data/cart.js";
 import {products , getProduct} from "../../data/products.js"
 import { formatCurreny } from "../utils/money.js";
 import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js'
-import { deliveryOptions, getDeliveryOption } from "../../data/deleveryOptions.js";
-
+import { deliveryOptions, getDeliveryOption ,calculateDeliveryDate} from "../../data/deleveryOptions.js";
+import {renderCheckoutHeader} from './checkoutHeader.js';
 import {paymentSummary} from './paymentSummary.js'
 
 
@@ -18,14 +18,8 @@ cart.forEach((cartItems)=>{
     var deliveryOptionId = cartItems.deliveryOptionsId;
 
     var deliveryOption = getDeliveryOption(deliveryOptionId);
-    
+    const dateString = calculateDeliveryDate(deliveryOption);
    
-
-
-    const today = dayjs();
-    const deliveryDate = today.add(deliveryOption.deliveryDays, "days");
-    const dateString = deliveryDate.format("dddd, MMMM D");
-
 
     
     cartSummary += `<div class="cart-item-container
@@ -84,11 +78,8 @@ function deliveryOptionsHTML(matchedProduct,cartItems) {
     let html = ``;
     deliveryOptions.forEach((deliveryOption)=>{
 
-      const today = dayjs();
-      const deliveryDate = today.add(deliveryOption.deliveryDays,"days");
-      
-      const dateString = deliveryDate.format("dddd, MMMM D");
-      
+      const dateString = calculateDeliveryDate(deliveryOption);
+     
       const priceString  = deliveryOption.priceCents === 0? 
       "Free": `$${formatCurreny(deliveryOption.priceCents)} -`
       
@@ -129,8 +120,9 @@ document.querySelectorAll(".js-delete-link").forEach((link)=>{
     const deleteId = link.dataset.productId;
     removeFromCart(deleteId);
     
-    const container = document.querySelector(`.js-cart-item-container-${deleteId}`);
-    container.remove();
+    renderOrderSummary();
+    renderCheckoutHeader();
+   
     updateCartQuantity();
     paymentSummary();
   })
@@ -174,8 +166,8 @@ document.querySelectorAll(".js-update-link")
 
       updateQuantity(productId,newQuantity);
       updateCartQuantity();
-      
-      document.querySelector(`.js-quantity-label-${productId}`) .innerHTML = newQuantity;
+      renderOrderSummary();
+      renderCheckoutHeader();
     })
   })
 
