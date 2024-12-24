@@ -1,4 +1,6 @@
-import { cart , removeFromCart , calculateCartQuantity, updateQuantity} from "../data/cart.js";
+import { cart , removeFromCart , 
+  calculateCartQuantity, updateQuantity,
+updateDeliveryOption} from "../data/cart.js";
 import {products} from "../data/products.js"
 import { formatCurreny } from "./utils/money.js";
 import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js'
@@ -21,17 +23,20 @@ cart.forEach((cartItems)=>{
         deliveryOption = option;
       }
     })
+    // console.log(deliveryOption); // Ensure deliveryOption is valid
+    // console.log(deliveryOption.deliveryDays); // Check its value
+
 
     const today = dayjs();
-    const deliveryDate = today.add(deliveryOption.deliveryDays,"days");
-    
+    const deliveryDate = today.add(deliveryOption.deliveryDays, "days");
     const dateString = deliveryDate.format("dddd, MMMM D");
+
 
     
     cartSummary += `<div class="cart-item-container
      js-cart-item-container-${matchedProduct.id}">
             <div class="delivery-date">
-              Delivery date: ${dateString}
+              Delivery date: ${dateString};
             </div>
 
             <div class="cart-item-details-grid">
@@ -96,7 +101,10 @@ function deliveryOptionsHTML(matchedProduct,cartItems) {
       deliveryOptionsId;
     
       html +=  `
-    <div class="delivery-option">
+    <div class="delivery-option
+    js-delivery-option"
+    data-product-id = "${matchedProduct.id}"
+    data-delivery-option-id = "${deliveryOption.id}">
       <input type="radio"  
       ${isChecked ? "checked":""}
       class="delivery-option-input"
@@ -174,3 +182,11 @@ document.querySelectorAll(".js-update-link")
       document.querySelector(`.js-quantity-label-${productId}`) .innerHTML = newQuantity;
     })
   })
+
+  document.querySelectorAll(".js-delivery-option")
+    .forEach((element)=>{
+      element.addEventListener("click",()=>{
+        const {deliveryOptionId,productId} = element.dataset;
+        updateDeliveryOption(productId,deliveryOptionId);
+      })
+    })
